@@ -19,14 +19,6 @@
     if (state.debugMode) console.log("[OCN]", ...args);
   };
 
-  const svgIcon = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="1"></circle>
-      <circle cx="12" cy="5" r="1"></circle>
-      <circle cx="12" cy="19" r="1"></circle>
-    </svg>
-  `;
-
   const getHostKey = () => {
     const host = location.host;
     if (host.includes("chatgpt.com") || host.includes("chat.openai.com")) return "chatgpt";

@@ -2,7 +2,7 @@
 
 一个 Chrome 扩展，为 ChatGPT 和 Gemini 添加聊天导航条功能。当对话很长时，可以通过右侧的导航条快速跳转到任意一条用户提问。
 
-![导航条示例](icons/icon128.png)
+![项目演示](./assets/demo.gif)
 
 ## ✨ 功能特点
 
@@ -36,7 +36,7 @@
 ```
 Conversation navigation bar/
 ├── manifest.json           # Chrome 扩展配置文件
-├── icons/                  # 扩展图标
+├── icons/                  # 扩展图标（用于Chrome扩展管理页面显示）
 │   ├── icon16.png
 │   ├── icon48.png
 │   └── icon128.png
@@ -45,6 +45,8 @@ Conversation navigation bar/
         ├── content-script.js   # 核心逻辑脚本
         └── navigation.css      # 导航条样式
 ```
+
+> **注意**：`icons/` 文件夹中的图标是 Chrome 扩展所必需的，用于在浏览器工具栏和扩展管理页面中显示。导航条本身不使用这些图标，而是采用纯 CSS 样式。
 
 ## 🔧 技术实现
 
@@ -63,10 +65,6 @@ Conversation navigation bar/
 1. 是否在 ChatGPT 或 Gemini 的对话页面中
 2. 页面中是否有用户消息
 3. 控制台是否有错误信息
-
-## 📄 许可证
-
-MIT License
 
 ## 🤝 贡献
 
