@@ -12,7 +12,9 @@
     mutationObserver: null,
     lastUrl: location.href,
     debugMode: false, // 生产环境关闭日志
-    isRefreshing: false
+    isRefreshing: false,
+    wideMode: false,
+    activeId: null
   };
 
   const log = (...args) => {
@@ -61,6 +63,105 @@
     return normalizeNodes(msgs);
   };
 
+  const getAnswerForUserMessage = (userId) => {
+    const userMsg = document.querySelector(`[${MESSAGE_ID_ATTR}="${userId}"]`);
+    if (!userMsg) return null;
+
+    let current = userMsg;
+    const host = getHostKey();
+    let distance = 0;
+    while (current && distance < 50) {
+      current = current.nextElementSibling;
+      if (!current) break;
+      distance++;
+
+      if (host === 'chatgpt') {
+        if (current.nodeType === 1 && current.matches && current.matches('[data-message-author-role="assistant"]')) return current;
+        if (current.querySelector) {
+          const nested = current.querySelector('[data-message-author-role="assistant"]');
+          if (nested) return nested;
+        }
+      } else {
+        if (current.tagName === 'MODEL-RESPONSE') return current;
+        if (current.querySelector) {
+          const nested = current.querySelector('model-response, .model-response-text');
+          if (nested) return nested;
+        }
+      }
+    }
+    return null;
+  };
+
+  const copyActiveAnswer = () => {
+    if (!state.activeId) {
+      alert("No active message selected. Scroll to a message first.");
+      return;
+    }
+
+    const answerNode = getAnswerForUserMessage(state.activeId);
+    if (!answerNode) {
+      alert("No AI response found for this message.");
+      return;
+    }
+
+    let text = answerNode.innerText;
+    text = text
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/##\s?/g, '')
+      .replace(/`{3,}/g, '')
+      .replace(/\[\d+\]/g, '')
+      .trim();
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('ocn-btn-copy');
+      if (btn) {
+        const old = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = old, 1500);
+      }
+    });
+  };
+
+  const toggleWideMode = () => {
+    state.wideMode = !state.wideMode;
+    document.body.classList.toggle('ocn-wide-mode', state.wideMode);
+    console.log('[OCN] Wide Mode toggled:', state.wideMode, 'Body classes:', document.body.className);
+
+    // 更新按钮状态
+    const btn = document.getElementById('ocn-btn-wide');
+    if (btn) {
+      btn.classList.toggle('active', state.wideMode);
+      btn.textContent = state.wideMode ? 'Wide: ON' : 'Wide: OFF';
+    }
+  };
+
+  const cleanCopy = () => {
+    const msgs = getModelMessages();
+    if (msgs.length === 0) {
+      alert("No model response found!");
+      return;
+    }
+    const lastMsg = msgs[msgs.length - 1];
+    let text = lastMsg.innerText;
+
+    // 清理 Markdown
+    text = text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
+      .replace(/##\s?/g, '')            // Headings
+      .replace(/`{3,}/g, '')            // Code blocks markers
+      .replace(/\[\d+\]/g, '')          // Citations
+      .trim();
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('ocn-btn-copy');
+      if (btn) {
+        const old = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = old, 1500);
+      }
+    });
+  };
+
   const ensurePanel = () => {
     let panel = document.getElementById(PANEL_ID);
     if (panel) return panel;
@@ -69,10 +170,25 @@
     panel.id = PANEL_ID;
     panel.className = NAV_CLASS;
     panel.innerHTML = `
+      <div class="ocn-tools-header">
+        <button id="ocn-btn-wide" class="ocn-tool-btn">Wide: OFF</button>
+        <button id="ocn-btn-copy" class="ocn-tool-btn">Copy Active</button>
+      </div>
       <div class="ocn-scroll-content"></div>
     `;
 
     document.body.appendChild(panel);
+
+    // Bind Events
+    document.getElementById('ocn-btn-wide').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleWideMode();
+    });
+    document.getElementById('ocn-btn-copy').addEventListener('click', (e) => {
+      e.stopPropagation();
+      copyActiveAnswer();
+    });
+
     return panel;
   };
 
@@ -97,6 +213,7 @@
     if (!panel) return;
     panel.querySelectorAll(`.ocn-item`).forEach(item => {
       const isActive = item.getAttribute("data-ocn-id") === id;
+      if (isActive) state.activeId = id; // Update state
       item.classList.toggle(ACTIVE_CLASS, isActive);
     });
   };

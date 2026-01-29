@@ -16,7 +16,40 @@
   --ocn-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
   --ocn-width-collapsed: 44px;
   --ocn-width-expanded: 280px;
+  --ocn-width-expanded: 280px;
   --ocn-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  --ocn-header-height: 44px;
+}
+
+/* Wide Mode Logic - Aggressive Overrides */
+/* ChatGPT specific containers */
+body.ocn-wide-mode [class*="max-w-"],
+body.ocn-wide-mode [class*="xl:max-w-"],
+body.ocn-wide-mode [class*="md:max-w-"],
+body.ocn-wide-mode [class*="lg:max-w-"],
+body.ocn-wide-mode .text-base,
+body.ocn-wide-mode article {
+  max-width: 90% !important;
+  width: 90% !important;
+}
+
+/* Gemini specific containers */
+body.ocn-wide-mode .conversation-container,
+body.ocn-wide-mode .input-area-container,
+body.ocn-wide-mode .bottom-container,
+body.ocn-wide-mode user-query,
+body.ocn-wide-mode model-response,
+body.ocn-wide-mode main>div {
+  max-width: 92% !important;
+  width: 92% !important;
+}
+
+/* Common centering */
+body.ocn-wide-mode .conversation-container,
+body.ocn-wide-mode article,
+body.ocn-wide-mode [class*="max-w-"] {
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 /* Main Panel Container */
@@ -50,6 +83,52 @@
   font-family: var(--ocn-font) !important;
   box-sizing: border-box !important;
   pointer-events: auto !important;
+}
+
+/* Tools Header */
+.ocn-tools-header {
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  border-bottom: 0px solid var(--ocn-border);
+  transition: all 0.3s ease;
+  opacity: 0;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#ocn-nav.ocn-panel:hover .ocn-tools-header {
+  height: var(--ocn-header-height);
+  border-bottom-width: 1px;
+  opacity: 1;
+}
+
+.ocn-tool-btn {
+  background: transparent;
+  border: 1px solid var(--ocn-border);
+  color: var(--ocn-text-muted);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ocn-tool-btn:hover {
+  background: var(--ocn-hover-bg);
+  color: var(--ocn-text-main);
+  border-color: var(--ocn-text-muted);
+}
+
+.ocn-tool-btn.active {
+  background: var(--ocn-accent);
+  color: white;
+  border-color: var(--ocn-accent);
+  box-shadow: 0 0 10px var(--ocn-accent-glow);
 }
 
 /* Expansion State */
